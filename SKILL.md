@@ -1,12 +1,12 @@
 ---
 name: github-notification-digest
-description: Summarize all unread GitHub notifications, then mark only the successfully summarized threads as read. Use when asked for a GitHub notification digest, unread GitHub updates, or a notification summary with automatic read marking.
+description: Summarize all unread GitHub notifications, save a dated Markdown digest in the user home folder under Github, then mark only the successfully summarized threads as read. Use when asked for a GitHub notification digest, unread GitHub updates, or a notification summary with automatic read marking.
 compatibility: Requires GitHub CLI (gh), authenticated to github.com with notification access and access to the relevant repositories.
 ---
 
 # GitHub notification digest
 
-Summarize unread notifications for the active GitHub account, show the summary, and only then mark the summarized threads as read. Invoking this skill authorizes these read status changes unless the user requests a preview or summary without marking.
+Summarize unread notifications for the active GitHub account, save and show the summary, and only then mark the summarized threads as read. Invoking this skill authorizes these read status changes unless the user requests a preview or summary without marking.
 
 ## 1. Check access
 
@@ -34,7 +34,7 @@ The command emits a separate JSON array for each page. Collect all pages and ded
 
 Keep the original thread IDs and `updated_at` values. Include all repositories and notification reasons unless the user explicitly requests a filter. Do not silently limit the number of notifications.
 
-If output is truncated, recover the complete output before proceeding. If pagination fails, stop without marking anything. If the list is empty, report that there are no unread notifications and stop.
+If output is truncated, recover the complete output before proceeding. If pagination fails, stop without marking anything. If the list is empty, save and link a dated Markdown file as described in section 4 stating that there are no unread notifications, then stop without status changes.
 
 ## 3. Read the relevant context
 
@@ -46,7 +46,13 @@ Use the API response's `html_url` as the human link. If a subject has no API URL
 
 If an available context endpoint fails, report the affected notification as incomplete and leave it unread. Continue with other notifications when possible. On authentication or rate limit errors, stop further requests and report the blockage; do not proceed to status changes.
 
-## 4. Show the digest before changing read status
+## 4. Save and show the digest before changing read status
+
+Save every digest as a UTF-8 Markdown file in `Github` directly under the user home directory. On this machine the destination is `C:/Users/TGOESSLER/Github/Notifications-YYYY-MM-DD.md`. Resolve the actual user home directory at runtime and create `Github` if needed. Determine `YYYY-MM-DD` from the local calendar date when the file is created, using the user's configured time zone (Europe/Vienna unless changed), rather than the notification timestamps or a hardcoded date.
+
+Include the account, creation timestamp with time zone, and the complete digest described below. If the file for that date already exists, append a separate timestamped digest section so earlier results are preserved. Read back the saved content to verify it before any notification status changes. If saving or verification fails, leave all notifications unread and report the failure.
+
+Link the saved file in the visible digest message. Saving is also required for preview runs and empty inboxes. After status changes, append the final counts and any failures or threads left unchanged to the same digest section.
 
 Send the digest as a visible assistant message before calling any write API. For a large inbox, send it in manageable batches, but finish displaying the digest before marking anything.
 

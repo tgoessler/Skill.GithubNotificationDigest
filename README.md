@@ -1,2 +1,2 @@
 # Agent Skill
-Summarize unread notifications for the active GitHub account, show the summary, and only then mark the summarized threads as read. Invoking this skill authorizes these read status changes unless the user requests a preview or summary without marking.
+Summarize all unread GitHub notifications, save a dated Markdown digest in the user home folder under Github, then mark only the successfully summarized threads as read. Use when asked for a GitHub notification digest, unread GitHub updates, or a notification summary with automatic read marking
